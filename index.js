@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const dns = require("dns");
 const { URL } = require("url");
+const fs = require("fs");
 
 const app = express();
 
@@ -48,28 +49,26 @@ app.post("/api/shorturl", (req, res) => {
       return res.json({ error: "invalid url" });
     }
 
-    const existing = urlDatabase.find((u) => u.original_url === originalUrl);
-    if (existing) {
-      return res.json(existing);
-    }
+    let data = JSON.parse(fs.readFileSync("db.json"));
 
-    const shortUrl = counter++;
+    const shortUrl = Object.keys(data).length + 1;
+    data[shortUrl] = originalUrl;
 
-    const newEntry = {
+    fs.writeFileSync("db.json", JSON.stringify(data));
+
+    res.json({
       original_url: originalUrl,
       short_url: shortUrl,
-    };
-
-    urlDatabase.push(newEntry);
-
-    res.json(newEntry);
+    });
   });
 });
 
 app.get("/api/shorturl/:short_url", (req, res) => {
-  const shortUrl = Number(req.params.short_url);
+  const shortUrl = req.params.short_url;
 
-  const originalUrl = urlDatabase[shortUrl];
+  let data = JSON.parse(fs.readFileSync("db.json"));
+
+  const originalUrl = data[shortUrl];
 
   if (!originalUrl) {
     return res.json({ error: "No short URL found" });
