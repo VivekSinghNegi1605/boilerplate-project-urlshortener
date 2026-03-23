@@ -69,16 +69,13 @@ app.post("/api/shorturl", (req, res) => {
 app.get("/api/shorturl/:short_url", (req, res) => {
   const shortUrl = Number(req.params.short_url);
 
-  const entry = urlDatabase.find((u) => u.short_url === shortUrl);
+  const originalUrl = urlDatabase[shortUrl];
 
-  if (!entry) {
+  if (!originalUrl) {
     return res.json({ error: "No short URL found" });
   }
 
-  res.writeHead(302, {
-    Location: entry.original_url,
-  });
-  res.end();
+  return res.redirect(originalUrl);
 });
 
 app.listen(port, function () {
