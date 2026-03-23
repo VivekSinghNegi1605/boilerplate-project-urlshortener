@@ -64,15 +64,15 @@ app.post("/api/shorturl", (req, res) => {
 });
 
 app.get("/api/shorturl/:short_url", (req, res) => {
-  const shortUrl = parseInt(req.params.short_url);
+  const shortUrl = Number(req.params.short_url);
 
-  const entry = urlDatabase.find((u) => u.shortUrl === shortUrl);
+  const entry = urlDatabase.find((u) => u.short_url === shortUrl);
 
   if (!entry) {
     return res.json({ error: "No short URL found" });
   }
 
-  res.redirect(entry.originalUrl);
+  res.redirect(entry.original_url);
 });
 
 app.listen(port, function () {
