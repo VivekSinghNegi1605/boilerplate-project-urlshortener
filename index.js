@@ -32,7 +32,6 @@ app.post("/api/shorturl", (req, res) => {
   const originalUrl = req.body.url;
 
   const urlRegex = /^https?:\/\/.+/;
-
   if (!urlRegex.test(originalUrl)) {
     return res.json({ error: "invalid url" });
   }
@@ -49,17 +48,21 @@ app.post("/api/shorturl", (req, res) => {
       return res.json({ error: "invalid url" });
     }
 
+    const existing = urlDatabase.find((u) => u.original_url === originalUrl);
+    if (existing) {
+      return res.json(existing);
+    }
+
     const shortUrl = counter++;
 
-    urlDatabase.push({
-      shortUrl,
-      originalUrl,
-    });
-
-    res.json({
+    const newEntry = {
       original_url: originalUrl,
       short_url: shortUrl,
-    });
+    };
+
+    urlDatabase.push(newEntry);
+
+    res.json(newEntry);
   });
 });
 
@@ -72,9 +75,8 @@ app.get("/api/shorturl/:short_url", (req, res) => {
     return res.json({ error: "No short URL found" });
   }
 
-  res.redirect(entry.original_url);
+  return res.redirect(entry.original_url);
 });
-
 app.listen(port, function () {
   console.log(`Listening on port ${port}`);
 });
