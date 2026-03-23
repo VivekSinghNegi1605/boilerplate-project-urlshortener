@@ -49,12 +49,20 @@ app.post("/api/shorturl", (req, res) => {
       return res.json({ error: "invalid url" });
     }
 
-    let data = JSON.parse(fs.readFileSync("db.json"));
+    let data = {};
+    try {
+      const file = fs.readFileSync("db.json", "utf8");
+      if (file && file.trim() !== "") {
+        data = JSON.parse(file);
+      }
+    } catch (err) {
+      data = {};
+    }
 
     const shortUrl = Object.keys(data).length + 1;
     data[shortUrl] = originalUrl;
 
-    fs.writeFileSync("db.json", JSON.stringify(data));
+    fs.writeFileSync("db.json", JSON.stringify(data, null, 2));
 
     res.json({
       original_url: originalUrl,
@@ -66,7 +74,19 @@ app.post("/api/shorturl", (req, res) => {
 app.get("/api/shorturl/:short_url", (req, res) => {
   const shortUrl = req.params.short_url;
 
-  let data = JSON.parse(fs.readFileSync("db.json"));
+  let data = {};
+
+  try {
+    const file = fs.readFileSync("db.json", "utf8");
+
+    if (file && file.trim() !== "") {
+      data = JSON.parse(file);
+    } else {
+      data = {};
+    }
+  } catch (err) {
+    data = {};
+  }
 
   const originalUrl = data[shortUrl];
 
