@@ -69,7 +69,7 @@ app.post("/api/shorturl", async (req, res) => {
 });
 
 app.get("/api/shorturl/:short_url", async (req, res) => {
-  const shortUrl = req.params.short_url;
+  const shortUrl = Number(req.params.short_url);
 
   try {
     const foundUrl = await Url.findOne({ short_url: shortUrl });
